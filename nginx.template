@@ -1,0 +1,63 @@
+# Configure JSON logging format
+log_format json_combined escape=json
+    '{'
+    '"timestamp":"$time_iso8601",'
+    '"remote_addr":"$remote_addr",'
+    '"request":"$request",'
+    '"status":"$status",'
+    '"bytes_sent":"$body_bytes_sent",'
+    '"request_time":"$request_time",'
+    '"http_referrer":"$http_referer",'
+    '"http_user_agent":"$http_user_agent"'
+    '}';
+
+# Main server block
+server {
+    listen 80;
+
+    # Use JSON logging format
+    access_log /var/log/nginx/access.log json_combined;
+
+    # Health check endpoint for ECS/manual verification
+    location /health {
+        access_log off;  # Don't log health checks
+        return 200 'healthy\n';
+        add_header Content-Type text/plain;
+    }
+
+    # Increase header buffer size to handle larger cookies/headers
+    large_client_header_buffers 4 32k;
+
+    # Allow larger file uploads (adjust if needed)
+    client_max_body_size 10M;
+
+    # Enable gzip compression for Rails assets
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    gzip_vary on;
+    
+    location / {
+        # Proxy to the dynamically configured backend
+        proxy_pass http://${UPSTREAM_HOST}:${UPSTREAM_PORT};
+
+        # Standard proxy headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Rails/Puma specific headers
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Request-Start "t=${msec}";
+
+        # Enable WebSocket support for ActionCable
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+
+        # Configure timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}

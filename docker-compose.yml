@@ -1,0 +1,15 @@
+services:
+  reverse-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "42069:80"
+    environment:
+      UPSTREAM_HOST: "nginx-default"
+      UPSTREAM_PORT: "80"
+
+  nginx-default:
+    image: nginx:1.26.2
+    ports:
+      - "81:80"
