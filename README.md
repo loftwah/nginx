@@ -135,7 +135,3 @@ The proxy outputs structured JSON logs with the following fields:
   "http_user_agent": "user_agent_string"
 }
 ```
-
-## License
-
-[License information here]
