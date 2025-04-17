@@ -19,7 +19,7 @@ server {
     access_log /var/log/nginx/access.log json_combined;
 
     # Health check endpoint for ECS/manual verification
-    location /health {
+    location /up {
         access_log off;  # Don't log health checks
         return 200 'healthy\n';
         add_header Content-Type text/plain;
