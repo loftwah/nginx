@@ -1,4 +1,5 @@
-FROM nginx:1.26.2
+FROM public.ecr.aws/nginx/nginx:1.26.2
+
 
 # Install envsubst for environment variable substitution
 RUN apt-get update && apt-get install -y gettext-base && apt-get clean
