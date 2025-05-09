@@ -1,4 +1,4 @@
-FROM public.ecr.aws/nginx/nginx:1.26.2
+FROM public.ecr.aws/nginx/nginx:1.28.0
 
 
 # Install envsubst for environment variable substitution
